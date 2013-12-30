@@ -127,13 +127,15 @@ public class NativeBitmapFactory {
         if (nativeConfig == 0) {
             return null;
         }
-        return createBitmap(width, height, nativeConfig, hasAlpha);
+        return android.os.Build.VERSION.SDK_INT == 19 ? createBitmap19(width, height, nativeConfig, hasAlpha) : createBitmap(width, height, nativeConfig, hasAlpha);
     }
-    
-    
-    /////////////native methods//////////
+
+    // ///////////native methods//////////
 
     private static native Bitmap createBitmap(int width, int height, int nativeConfig,
+            boolean hasAlpha);
+
+    private static native Bitmap createBitmap19(int width, int height, int nativeConfig,
             boolean hasAlpha);
 
 }

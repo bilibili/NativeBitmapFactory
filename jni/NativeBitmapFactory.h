@@ -6,6 +6,10 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+jobject createBitmap(JNIEnv * env ,jobject  obj,jint w,jint h,SkBitmap::Config config,jboolean hasAlpha,int isMuttable);
+
+JNIEXPORT jobject JNICALL Java_tv_cjump_jni_NativeBitmapFactory_createBitmap(JNIEnv * env ,jobject  obj,jint w,jint h,SkBitmap::Config config,jboolean hasAlph);
+
 JNIEXPORT jobject JNICALL Java_tv_cjump_jni_NativeBitmapFactory_createBitmap(JNIEnv * env ,jobject  obj,jint w,jint h,SkBitmap::Config config,jboolean hasAlph);
 #ifdef __cplusplus
 }
