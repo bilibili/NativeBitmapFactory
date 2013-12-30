@@ -10,7 +10,7 @@ jobject createBitmap(JNIEnv * env ,jobject  obj,jint w,jint h,SkBitmap::Config c
 
 JNIEXPORT jobject JNICALL Java_tv_cjump_jni_NativeBitmapFactory_createBitmap(JNIEnv * env ,jobject  obj,jint w,jint h,SkBitmap::Config config,jboolean hasAlph);
 
-JNIEXPORT jobject JNICALL Java_tv_cjump_jni_NativeBitmapFactory_createBitmap(JNIEnv * env ,jobject  obj,jint w,jint h,SkBitmap::Config config,jboolean hasAlph);
+JNIEXPORT jobject JNICALL Java_tv_cjump_jni_NativeBitmapFactory_createBitmap19(JNIEnv * env ,jobject  obj,jint w,jint h,SkBitmap::Config config,jboolean hasAlph);
 #ifdef __cplusplus
 }
 #endif
