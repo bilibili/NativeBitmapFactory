@@ -55,6 +55,10 @@ function cp_release_so(){
 	yes | cp tmp/libs/armeabi/libndkbitmap*.so libs/armeabi
 	mkdir -p libs/armeabi-v7a
 	yes | cp -rf tmp/libs/armeabi/libndkbitmap*.so libs/armeabi-v7a
+	mkdir -p libs/x86
+	yes | cp -rf tmp/libs/armeabi/libndkbitmap*.so libs/x86
+	mkdir -p libs/mips
+	yes | cp -rf tmp/libs/armeabi/libndkbitmap*.so libs/mips
 }
 
 rm -rf tmp
