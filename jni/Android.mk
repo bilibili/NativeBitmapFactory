@@ -1,12 +1,27 @@
 LOCAL_PATH :=$(call my-dir)
 include $(CLEAR_VARS)
 LOCAL_MODULE := libskia.$(API)
-LOCAL_SRC_FILES := ../AndroidLibs/libskia.$(API).so
+LOCAL_SRC_FILES := ../AndroidLibs/$(TARGET_ARCH)/libskia.$(API).so
+
+ifeq ($(TARGET_ARCH),x86)
+ifneq ($(API),19)
+LOCAL_SRC_FILES := ../AndroidLibs/$(TARGET_ARCH)/libskia.17.so
+endif
+else ifeq ($(TARGET_ARCH),mips)
+LOCAL_SRC_FILES := ../AndroidLibs/$(TARGET_ARCH)/libskia.17.so
+endif
 include $(PREBUILT_SHARED_LIBRARY)
 
 include $(CLEAR_VARS)
 LOCAL_MODULE := libandroid_runtime.$(API)
-LOCAL_SRC_FILES := ../AndroidLibs/libandroid_runtime.$(API).so
+LOCAL_SRC_FILES := ../AndroidLibs/$(TARGET_ARCH)/libandroid_runtime.$(API).so
+ifeq ($(TARGET_ARCH),x86)
+ifneq ($(API),19)
+LOCAL_SRC_FILES := ../AndroidLibs/$(TARGET_ARCH)/libandroid_runtime.17.so
+endif
+else ifeq ($(TARGET_ARCH),mips)
+LOCAL_SRC_FILES := ../AndroidLibs/$(TARGET_ARCH)/libandroid_runtime.17.so
+endif
 include $(PREBUILT_SHARED_LIBRARY)
 
 include $(CLEAR_VARS)

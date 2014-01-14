@@ -1,11 +1,9 @@
-//Test1.cpp
-//JNI端的实现
 #include <stdio.h>
 #include <stdlib.h>
 #include <jni.h>
 #include <SkBitmap.h>
 #include <GraphicsJNI.h>
-#include <android/log.h>
+//#include <android/log.h>
 #include "NativeBitmapFactory.h"
 
 jobject createBitmap(JNIEnv * env ,jobject  obj,jint w,jint h,SkBitmap::Config config,jboolean hasAlpha,int isMuttable)
