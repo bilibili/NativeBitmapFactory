@@ -3,7 +3,6 @@
 #git clone https://android.googlesource.com/platform/system/core AndroidSource/platform/system/core
 #git clone https://android.googlesource.com/platform/frameworks/native AndroidSource/platform/frameworks/native
 
-export NDK_ROOT=/cygdrive/d/Android/android-ndk-r8b/ndk-build
 export ANDROID_SOURCE_PATH=AndroidSource
 
 function checkout_tags(){
@@ -41,7 +40,7 @@ function checkout_tags(){
 function build_so(){
 	echo "-----ndk build libskia.so-------- "
 	export API=$1
-	$NDK_ROOT
+	ndk-build
 }
 
 function cp_so(){
@@ -59,6 +58,8 @@ function cp_release_so(){
 	yes | cp -rf tmp/libs/x86/libndkbitmap*.so libs/x86
 	mkdir -p libs/mips
 	yes | cp -rf tmp/libs/mips/libndkbitmap*.so libs/mips
+	
+	rm -rf tmp
 }
 
 rm -rf tmp
