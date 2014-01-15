@@ -2,6 +2,18 @@
 #git clone https://android.googlesource.com/platform/frameworks/base AndroidSource/platform/frameworks/base
 #git clone https://android.googlesource.com/platform/system/core AndroidSource/platform/system/core
 #git clone https://android.googlesource.com/platform/frameworks/native AndroidSource/platform/frameworks/native
+cd AndroidSource/platform/external/skia
+git pull
+cd -
+cd AndroidSource/platform/frameworks/base
+git pull
+cd -
+cd AndroidSource/platform/system/core
+git pull
+cd -
+cd AndroidSource/platform/frameworks/native
+git pull
+cd -
 
 export ANDROID_SOURCE_PATH=AndroidSource
 
