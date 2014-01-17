@@ -51,7 +51,7 @@ checkout_tags() {
 	cd $ANDROID_SOURCE_PATH/platform/system/core
 	git add .
 	git commit -m 'commit'
-	git checkout -b $1 $1	
+	git checkout -b $1 $1
 	git checkout $1 -f
 	git branch
 	cd -
