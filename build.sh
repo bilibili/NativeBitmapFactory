@@ -9,10 +9,10 @@ mkdir -p $ANDROID_SOURCE_PATH/platform/frameworks/base
 mkdir -p $ANDROID_SOURCE_PATH/platform/system/core
 mkdir -p $ANDROID_SOURCE_PATH/platform/frameworks/native
 
-git clone https://android.googlesource.com/platform/external/skia $ANDROID_SOURCE_PATH/platform/external/skia
-git clone https://android.googlesource.com/platform/frameworks/base $ANDROID_SOURCE_PATH/platform/frameworks/base
-git clone https://android.googlesource.com/platform/system/core $ANDROID_SOURCE_PATH/platform/system/core
-git clone https://android.googlesource.com/platform/frameworks/native $ANDROID_SOURCE_PATH/platform/frameworks/native
+git clone https://github.com/ctiao/platform-external-skia.git $ANDROID_SOURCE_PATH/platform/external/skia
+git clone https://github.com/ctiao/platform-frameworks-base.git $ANDROID_SOURCE_PATH/platform/frameworks/base
+git clone https://github.com/ctiao/platform-system-core.git $ANDROID_SOURCE_PATH/platform/system/core
+git clone https://github.com/ctiao/platform-frameworks-native.git $ANDROID_SOURCE_PATH/platform/frameworks/native
 cd $ANDROID_SOURCE_PATH/platform/external/skia
 git pull
 cd -
