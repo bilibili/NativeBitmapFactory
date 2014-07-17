@@ -10,7 +10,7 @@ mkdir -p $ANDROID_SOURCE_PATH/platform/system/core
 mkdir -p $ANDROID_SOURCE_PATH/platform/frameworks/native
 
 git clone https://github.com/ctiao/platform-external-skia.git $ANDROID_SOURCE_PATH/platform/external/skia
-git clone https://github.com/ctiao/platform-frameworks-base.git $ANDROID_SOURCE_PATH/platform/frameworks/base
+git clone https://github.com/android/platform_frameworks_base.git $ANDROID_SOURCE_PATH/platform/frameworks/base
 git clone https://github.com/ctiao/platform-system-core.git $ANDROID_SOURCE_PATH/platform/system/core
 git clone https://github.com/ctiao/platform-frameworks-native.git $ANDROID_SOURCE_PATH/platform/frameworks/native
 cd $ANDROID_SOURCE_PATH/platform/external/skia
@@ -33,7 +33,6 @@ checkout_tags() {
 	cd $ANDROID_SOURCE_PATH/platform/external/skia
 	git add .
 	git commit -m 'commit'
-	git checkout -b $1 $1
 	git checkout $1 -f
 	git branch
 	cd -
@@ -42,7 +41,6 @@ checkout_tags() {
 	cd $ANDROID_SOURCE_PATH/platform/frameworks/base
 	git add .
 	git commit -m 'commit'
-	git checkout -b $1 $1
 	git checkout $1 -f
 	git branch
 	cd -
@@ -51,7 +49,6 @@ checkout_tags() {
 	cd $ANDROID_SOURCE_PATH/platform/system/core
 	git add .
 	git commit -m 'commit'
-	git checkout -b $1 $1
 	git checkout $1 -f
 	git branch
 	cd -
@@ -60,7 +57,6 @@ checkout_tags() {
 	cd $ANDROID_SOURCE_PATH/platform/frameworks/native
 	git add .
 	git commit -m 'commit'
-	git checkout -b $1 $1
 	git checkout $1 -f
 	git branch
 	cd -
@@ -75,8 +71,8 @@ build_so() {
 }
 
 cp_so() {
-	mkdir tmp
-	cp libs tmp -rf
+	mkdir -p tmp
+	cp -rf libs tmp
 }
 
 cp_release_so() {
@@ -119,9 +115,13 @@ checkout_tags android-4.3_r1
 build_so 18
 cp_so
 
-checkout_tags android-4.4.2_r1
+checkout_tags android-4.4.1_r1
 cp $ANDROID_SOURCE_PATH/platform/external/skia/include/lazy/SkBitmapFactory.h $ANDROID_SOURCE_PATH/platform/external/skia/include/core/SkBitmapFactory.h #file missing
 build_so 19
+cp_so
+
+checkout_tags android-4.4.4_r1
+build_so 19-2
 cp_so
 
 cp_release_so

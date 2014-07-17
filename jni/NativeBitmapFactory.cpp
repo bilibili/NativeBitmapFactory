@@ -10,7 +10,7 @@ jobject createBitmap(JNIEnv * env ,jobject  obj,jint w,jint h,SkBitmap::Config c
 {
 SkBitmap* bm = new SkBitmap();
 bm->setConfig(config, w, h);
-bm->setIsOpaque(!hasAlpha);
+//bm->setIsOpaque(!hasAlpha);
 bm->allocPixels();
 bm->eraseColor(0);
 //__android_log_print(ANDROID_LOG_DEBUG, "NativeBitmap", "Created bitmap %d has width = %d, height = %d",bm, bm->width(), bm->height());

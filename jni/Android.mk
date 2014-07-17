@@ -5,7 +5,9 @@ LOCAL_SRC_FILES := ../AndroidLibs/$(TARGET_ARCH)/libskia.$(API).so
 
 ifeq ($(TARGET_ARCH),x86)
 ifneq ($(API),19)
+ifneq ($(API),19-2)
 LOCAL_SRC_FILES := ../AndroidLibs/$(TARGET_ARCH)/libskia.17.so
+endif
 endif
 else ifeq ($(TARGET_ARCH),mips)
 LOCAL_SRC_FILES := ../AndroidLibs/$(TARGET_ARCH)/libskia.17.so
