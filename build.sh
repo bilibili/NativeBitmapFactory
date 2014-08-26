@@ -11,21 +11,21 @@ mkdir -p $ANDROID_SOURCE_PATH/platform/frameworks/base
 mkdir -p $ANDROID_SOURCE_PATH/platform/system/core
 mkdir -p $ANDROID_SOURCE_PATH/platform/frameworks/native
 
-git clone https://github.com/android/platform_frameworks_base.git $ANDROID_SOURCE_PATH/platform/frameworks/base
-git clone https://github.com/ctiao/platform-system-core.git $ANDROID_SOURCE_PATH/platform/system/core
-git clone https://github.com/ctiao/platform-frameworks-native.git $ANDROID_SOURCE_PATH/platform/frameworks/native
-cd $ANDROID_SOURCE_PATH/platform/external/skia
-git pull
-cd -
-cd $ANDROID_SOURCE_PATH/platform/frameworks/base
-git pull
-cd -
-cd $ANDROID_SOURCE_PATH/platform/system/core
-git pull
-cd -
-cd $ANDROID_SOURCE_PATH/platform/frameworks/native
-git pull
-cd -
+# git clone https://github.com/android/platform_frameworks_base.git $ANDROID_SOURCE_PATH/platform/frameworks/base
+# git clone https://github.com/ctiao/platform-system-core.git $ANDROID_SOURCE_PATH/platform/system/core
+# git clone https://github.com/ctiao/platform-frameworks-native.git $ANDROID_SOURCE_PATH/platform/frameworks/native
+# cd $ANDROID_SOURCE_PATH/platform/external/skia
+# git pull
+# cd -
+# cd $ANDROID_SOURCE_PATH/platform/frameworks/base
+# git pull
+# cd -
+# cd $ANDROID_SOURCE_PATH/platform/system/core
+# git pull
+# cd -
+# cd $ANDROID_SOURCE_PATH/platform/frameworks/native
+# git pull
+# cd -
 
 
 
@@ -67,6 +67,7 @@ checkout_tags() {
 
 build_so() {
 	echo "\n\n-----ndk build libndkbitmap.so-------- "
+	export API=$1
 	ndk-build
 }
 
@@ -91,9 +92,14 @@ cp_release_so() {
 
 rm -rf tmp
 
-checkout_tags android-cts-4.4_r1
-build_so
+checkout_tags android-4.3_r1
+build_so 18
 cp_so
+
+checkout_tags android-4.4.1_r1
+build_so 19
+cp_so
+
 
 cp_release_so
 
