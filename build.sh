@@ -96,9 +96,9 @@ checkout_tags android-4.3_r1
 build_so 18
 cp_so
 
-checkout_tags android-4.4.1_r1
-build_so 19
-cp_so
+# checkout_tags android-4.4.1_r1
+# build_so 19
+# cp_so
 
 
 cp_release_so
