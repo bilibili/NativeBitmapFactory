@@ -3,7 +3,9 @@
 #include <jni.h>
 #include <dlfcn.h>
 //#include <SkBitmap.h>
-#include <GraphicsJNI.h>
+//#include <GraphicsJNI.h>
+#include <stdint.h>
+#include <malloc.h>
 #include <android/log.h>
 #include "NativeBitmapFactory.h"
 
@@ -88,28 +90,6 @@ enum SkAlphaType
 };
 
 /**
- * SK_PMCOLOR_BYTE_ORDER can be used to query the byte order of SkPMColor at compile time. The
- * relationship between the byte order and shift values depends on machine endianness. If the shift
- * order is R=0, G=8, B=16, A=24 then ((char*)&pmcolor)[0] will produce the R channel on a little
- * endian machine and the A channel on a big endian machine. Thus, given those shifts values,
- * SK_PMCOLOR_BYTE_ORDER(R,G,B,A) will be true on a little endian machine and
- * SK_PMCOLOR_BYTE_ORDER(A,B,G,R) will be true on a big endian machine.
- */
-#ifdef SK_CPU_BENDIAN
-    #define SK_PMCOLOR_BYTE_ORDER(C0, C1, C2, C3)     \
-        (SK_ ## C3 ## 32_SHIFT == 0  &&             \
-         SK_ ## C2 ## 32_SHIFT == 8  &&             \
-         SK_ ## C1 ## 32_SHIFT == 16 &&             \
-         SK_ ## C0 ## 32_SHIFT == 24)
-#else
-    #define SK_PMCOLOR_BYTE_ORDER(C0, C1, C2, C3)     \
-        (SK_ ## C0 ## 32_SHIFT == 0  &&             \
-         SK_ ## C1 ## 32_SHIFT == 8  &&             \
-         SK_ ## C2 ## 32_SHIFT == 16 &&             \
-         SK_ ## C3 ## 32_SHIFT == 24)
-#endif
-
-/**
  *  Describes how to interpret the components of a pixel.
  */
 enum SkColorType {
@@ -123,13 +103,7 @@ enum SkColorType {
 
     kLastEnum_SkColorType = kIndex_8_SkColorType,
 
-#if SK_PMCOLOR_BYTE_ORDER(B,G,R,A)
-    kN32_SkColorType = kBGRA_8888_SkColorType,
-#elif SK_PMCOLOR_BYTE_ORDER(R,G,B,A)
     kN32_SkColorType = kRGBA_8888_SkColorType,
-#else
-#error "SK_*32_SHFIT values must correspond to BGRA or RGBA byte order"
-#endif
 
 #ifdef SK_SUPPORT_LEGACY_N32_NAME
     kPMColor_SkColorType = kN32_SkColorType
@@ -352,6 +326,11 @@ inline void *createSkBitmap(ndkbitmap_object_t *obj, int config, int w, int h)
 
 jboolean Java_tv_cjump_jni_NativeBitmapFactory_init(JNIEnv *env)
 {
+#if defined(__arm__)
+    __android_log_print(ANDROID_LOG_INFO, "NativeBitmapFactory", "Loaded libndkbitmap.so arch is: ARM");
+#elif defined(__i386__)
+    __android_log_print(ANDROID_LOG_INFO, "NativeBitmapFactory", "Loaded libndkbitmap.so arch is: x86");
+#endif
     int r = Start();
     return r == SUCCESS;
 }

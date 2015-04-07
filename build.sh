@@ -83,7 +83,7 @@ cp_release_so() {
 	mkdir -p $DEST_PATH/armeabi-v7a
 	yes | cp -rf tmp/libs/armeabi/libndkbitmap*.so $DEST_PATH/armeabi-v7a
 	mkdir -p $DEST_PATH/x86
-	yes | cp -rf tmp/libs/armeabi/libndkbitmap*.so $DEST_PATH/x86
+	yes | cp -rf tmp/libs/x86/libndkbitmap*.so $DEST_PATH/x86
 	mkdir -p $DEST_PATH/mips
 	yes | cp -rf tmp/libs/armeabi/libndkbitmap*.so $DEST_PATH/mips
 	
