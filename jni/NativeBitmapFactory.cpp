@@ -169,6 +169,12 @@ static void *InitLibrary(struct skbitmap_sys_t *p_sys)
     p_sys->sk_allocPixels = (SkBitmap_allocPixels)(dlsym(p_library, "_ZN8SkBitmap11allocPixelsEPNS_9AllocatorEP12SkColorTable"));
     p_sys->sk_eraseARGB = (SkBitmap_eraseARGB)(dlsym(p_library, "_ZNK8SkBitmap9eraseARGBEjjjj"));
 
+    __android_log_print(ANDROID_LOG_INFO, "NBF", "ctor:%p,dtor:%p,setConfig:%p,setConfig_19later:%p,setInfo:%p,allocPixels:%p,eraseARGB:%p",
+                        p_sys->sk_ctor,
+                        p_sys->sk_dtor,
+                        p_sys->sk_setConfig,p_sys->sk_setConfig_19later,p_sys->sk_setInfo,
+                        p_sys->sk_allocPixels,p_sys->sk_eraseARGB
+                        );
     // We need all the Symbols
     if (!(p_sys->sk_ctor && p_sys->sk_dtor
             && (p_sys->sk_setConfig || p_sys->sk_setConfig_19later || p_sys->sk_setInfo)
@@ -199,7 +205,11 @@ static void *InitLibrary2(struct skbitmap_sys_t *p_sys)
     if(!p_sys->gjni_createBitmap_19later) 
     {
         p_sys->gjni_createBitmap_19later = (GraphicsJNI_createBitmap_19later)(dlsym(p_library, "_ZN11GraphicsJNI12createBitmapEP7_JNIEnvP8SkBitmapP11_jbyteArrayiS5_P8_jobjecti"));
-    } 
+    }
+
+    __android_log_print(ANDROID_LOG_INFO, "NBF", "createBitmap:%p,createBitmap_19later:%p",
+                        p_sys->gjni_createBitmap,
+                        p_sys->gjni_createBitmap_19later);
 
     // We need all the Symbols
     if (!p_sys->gjni_createBitmap && !p_sys->gjni_createBitmap_19later)
@@ -244,8 +254,17 @@ static void Close(ndkbitmap_object_t *obj)
 {
     skbitmap_sys_t *sys = obj->sys;
 
-    dlclose(sys->libskia);
-    dlclose(sys->libjnigraphics);
+    if (sys == NULL) {
+        return;
+    }
+    if (sys->libjnigraphics) {
+        dlclose(sys->libjnigraphics);
+        sys->libjnigraphics = NULL;
+    }
+    if (sys->libskia) {
+        dlclose(sys->libskia);
+        sys->libskia = NULL;
+    }
     free(sys);
 }
 
@@ -255,8 +274,10 @@ static int Start()
     int r = Open(ndkbitmap_obj);
     if (r != SUCCESS)
     {
-        if (ndkbitmap_obj)
+        if (ndkbitmap_obj){
             free(ndkbitmap_obj);
+            ndkbitmap_obj = NULL;
+        }
         return ENOMEM;
     }
     return SUCCESS;
@@ -270,6 +291,7 @@ static int Stop()
     }
     Close(ndkbitmap_obj);
     free(ndkbitmap_obj);
+    ndkbitmap_obj = NULL;
     return SUCCESS;
 }
 
