@@ -161,25 +161,27 @@ static void *InitLibrary(struct skbitmap_sys_t *p_sys)
         p_sys->sk_setConfig = (SkBitmap_setConfig)(dlsym(p_library, "_ZN8SkBitmap9setConfigENS_6ConfigEiij"));
     }
     p_sys->sk_setConfig_19later = (SkBitmap_setConfig_19later)(dlsym(p_library, "_ZN8SkBitmap9setConfigENS_6ConfigEiij11SkAlphaType"));
-    if(!p_sys->sk_setConfig && !p_sys->sk_setConfig_19later)
+    if (!p_sys->sk_setConfig && !p_sys->sk_setConfig_19later)
     {
         p_sys->sk_setInfo = (SkBitmap_setInfo)(dlsym(p_library, "_ZN8SkBitmap7setInfoERK11SkImageInfoj"));
     }
 
     p_sys->sk_allocPixels = (SkBitmap_allocPixels)(dlsym(p_library, "_ZN8SkBitmap11allocPixelsEPNS_9AllocatorEP12SkColorTable"));
+    if (!p_sys->sk_allocPixels) {    // for Nexus Android M Preview
+        p_sys->sk_allocPixels = (SkBitmap_allocPixels)(dlsym(p_library, "_ZN8SkBitmap14tryAllocPixelsEPNS_9AllocatorEP12SkColorTable"));
+    }
     p_sys->sk_eraseARGB = (SkBitmap_eraseARGB)(dlsym(p_library, "_ZNK8SkBitmap9eraseARGBEjjjj"));
 
-    __android_log_print(ANDROID_LOG_INFO, "NBF", "ctor:%p,dtor:%p,setConfig:%p,setConfig_19later:%p,setInfo:%p,allocPixels:%p,eraseARGB:%p",
-                        p_sys->sk_ctor,
-                        p_sys->sk_dtor,
-                        p_sys->sk_setConfig,p_sys->sk_setConfig_19later,p_sys->sk_setInfo,
-                        p_sys->sk_allocPixels,p_sys->sk_eraseARGB
-                        );
+    __android_log_print(ANDROID_LOG_INFO, "NativeBitmapFactory", "[libskia] ctor:%p,dtor:%p,setConfig:%p,setConfig_19later:%p,setInfo:%p,allocPixels:%p,eraseARGB:%p",
+                        p_sys->sk_ctor, p_sys->sk_dtor,
+                        p_sys->sk_setConfig, p_sys->sk_setConfig_19later, p_sys->sk_setInfo,
+                        p_sys->sk_allocPixels, p_sys->sk_eraseARGB);
     // We need all the Symbols
     if (!(p_sys->sk_ctor && p_sys->sk_dtor
             && (p_sys->sk_setConfig || p_sys->sk_setConfig_19later || p_sys->sk_setInfo)
             && p_sys->sk_allocPixels && p_sys->sk_eraseARGB))
     {
+        __android_log_print(ANDROID_LOG_ERROR, "NativeBitmapFactory", "InitLibrary dlsym failed");
         dlclose(p_library);
         return NULL;
     }
@@ -207,14 +209,14 @@ static void *InitLibrary2(struct skbitmap_sys_t *p_sys)
         p_sys->gjni_createBitmap_19later = (GraphicsJNI_createBitmap_19later)(dlsym(p_library, "_ZN11GraphicsJNI12createBitmapEP7_JNIEnvP8SkBitmapP11_jbyteArrayiS5_P8_jobjecti"));
     }
 
-    __android_log_print(ANDROID_LOG_INFO, "NBF", "createBitmap:%p,createBitmap_19later:%p",
+    __android_log_print(ANDROID_LOG_INFO, "NativeBitmapFactory", "[GraphicsJNI] createBitmap:%p,createBitmap_19later:%p",
                         p_sys->gjni_createBitmap,
                         p_sys->gjni_createBitmap_19later);
 
     // We need all the Symbols
     if (!p_sys->gjni_createBitmap && !p_sys->gjni_createBitmap_19later)
     {
-        __android_log_print(ANDROID_LOG_INFO, "NBF", "InitLibrary2 dlsym failed");
+        __android_log_print(ANDROID_LOG_ERROR, "NativeBitmapFactory", "InitLibrary2 dlsym failed");
         p_sys->gjni_createBitmap = NULL;
         p_sys->gjni_createBitmap_19later = NULL;
         dlclose(p_library);
