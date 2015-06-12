@@ -50,6 +50,8 @@ typedef jobject (*GraphicsJNI_createBitmap)(void *, void *, int, void *, int);
 //API21: _ZN11GraphicsJNI12createBitmapEP7_JNIEnvP8SkBitmapP11_jbyteArrayiS5_P8_jobjecti
 typedef jobject (*GraphicsJNI_createBitmap_19later)(void *, void *, void *, int, void *, void *, int);
 
+typedef jobject (*GraphicsJNI_createBitmap_Mlater)(JNIEnv* env, void*, jbyteArray, int, jbyteArray, jobject, int, int, int);
+
 
 /**
  *  Describes how to interpret the alpha compoent of a pixel.
@@ -137,12 +139,47 @@ struct skbitmap_sys_t
     void *libjnigraphics;
     GraphicsJNI_createBitmap gjni_createBitmap;
     GraphicsJNI_createBitmap_19later gjni_createBitmap_19later;
+    GraphicsJNI_createBitmap_Mlater gjni_createBitmap_Mlater;
 };
 
 struct ndkbitmap_object_t
 {
     skbitmap_sys_t *sys;
 };
+
+
+enum BitmapCreateFlags {
+    kBitmapCreateFlag_None = 0x0,
+    kBitmapCreateFlag_Mutable = 0x1,
+    kBitmapCreateFlag_Premultiplied = 0x2,
+};
+
+static jclass   gBitmap_class;
+static jmethodID gBitmap_constructorMethodID;
+
+static jclass make_globalref(JNIEnv* env, const char classname[])
+{
+    jclass c = env->FindClass(classname);
+    if(c) {
+        return (jclass)env->NewGlobalRef(c);
+    }
+    return NULL;
+}
+
+static jobject createBitmapM(JNIEnv* env, void* bitmap, jbyteArray buffer,
+        int bitmapCreateFlags, jbyteArray ninePatchChunk, jobject ninePatchInsets, int density, int width, int height)
+{
+    bool isMutable = bitmapCreateFlags & kBitmapCreateFlag_Mutable;
+    bool isPremultiplied = bitmapCreateFlags & kBitmapCreateFlag_Premultiplied;
+    __android_log_print(ANDROID_LOG_INFO, "NativeBitmapFactory", "createBitmapM %d-%d", isMutable, isPremultiplied);
+    jobject obj = env->NewObject(gBitmap_class, gBitmap_constructorMethodID,
+            reinterpret_cast<jlong>(bitmap), buffer,
+            width, height, density, isMutable, isPremultiplied,
+            ninePatchChunk, ninePatchInsets);
+    __android_log_print(ANDROID_LOG_INFO, "NativeBitmapFactory", "createBitmapM end");
+    return obj;
+}
+
 
 static void *InitLibrary(struct skbitmap_sys_t *p_sys)
 {
@@ -188,7 +225,7 @@ static void *InitLibrary(struct skbitmap_sys_t *p_sys)
     return p_library;
 }
 
-static void *InitLibrary2(struct skbitmap_sys_t *p_sys)
+static void *InitLibrary2(struct skbitmap_sys_t *p_sys, JNIEnv *env)
 {
     /* DL Open libjnigraphics */
     void *p_library;
@@ -209,16 +246,35 @@ static void *InitLibrary2(struct skbitmap_sys_t *p_sys)
         p_sys->gjni_createBitmap_19later = (GraphicsJNI_createBitmap_19later)(dlsym(p_library, "_ZN11GraphicsJNI12createBitmapEP7_JNIEnvP8SkBitmapP11_jbyteArrayiS5_P8_jobjecti"));
     }
 
-    __android_log_print(ANDROID_LOG_INFO, "NativeBitmapFactory", "[GraphicsJNI] createBitmap:%p,createBitmap_19later:%p",
+    if (!p_sys->gjni_createBitmap && !p_sys->gjni_createBitmap_19later) {
+        if (!gBitmap_class) {
+            gBitmap_class = make_globalref(env, "android/graphics/Bitmap");
+        }
+        if (gBitmap_class) {
+            gBitmap_constructorMethodID = env->GetMethodID(gBitmap_class, "<init>", "(J[BIIIZZ[BLandroid/graphics/NinePatch$InsetStruct;)V");
+            jthrowable jexception = env->ExceptionOccurred();
+            if (jexception) {
+                 // __android_log_print(ANDROID_LOG_INFO, "NativeBitmapFactory", "gBitmap_class:%p, gBitmap_constructorMethodID:%p", gBitmap_class, gBitmap_constructorMethodID);
+                env->ExceptionDescribe();
+                env->ExceptionClear();
+            } else {
+                p_sys->gjni_createBitmap_Mlater = createBitmapM;
+            }
+        }
+    }
+
+    __android_log_print(ANDROID_LOG_INFO, "NativeBitmapFactory", "[GraphicsJNI] createBitmap:%p,createBitmap_19later:%p,createBitmap_Mlater:%p",
                         p_sys->gjni_createBitmap,
-                        p_sys->gjni_createBitmap_19later);
+                        p_sys->gjni_createBitmap_19later,
+                        p_sys->gjni_createBitmap_Mlater);
 
     // We need all the Symbols
-    if (!p_sys->gjni_createBitmap && !p_sys->gjni_createBitmap_19later)
+    if (!p_sys->gjni_createBitmap && !p_sys->gjni_createBitmap_19later && !p_sys->gjni_createBitmap_Mlater)
     {
         __android_log_print(ANDROID_LOG_ERROR, "NativeBitmapFactory", "InitLibrary2 dlsym failed");
         p_sys->gjni_createBitmap = NULL;
         p_sys->gjni_createBitmap_19later = NULL;
+        p_sys->gjni_createBitmap_Mlater = NULL;
         dlclose(p_library);
         return NULL;
     }
@@ -228,7 +284,7 @@ static void *InitLibrary2(struct skbitmap_sys_t *p_sys)
 ndkbitmap_object_t *ndkbitmap_obj;
 
 
-static int Open(ndkbitmap_object_t *obj)
+static int Open(ndkbitmap_object_t *obj, JNIEnv *env)
 {
     skbitmap_sys_t *sys = (skbitmap_sys_t *)malloc(sizeof (*sys));
 
@@ -241,7 +297,7 @@ static int Open(ndkbitmap_object_t *obj)
         free(sys);
         return EGENERIC;
     }
-    sys->libjnigraphics = InitLibrary2(sys);
+    sys->libjnigraphics = InitLibrary2(sys, env);
     if (sys->libjnigraphics == NULL)
     {
         free(sys);
@@ -270,10 +326,10 @@ static void Close(ndkbitmap_object_t *obj)
     free(sys);
 }
 
-static int Start()
+static int Start(JNIEnv *env)
 {
     ndkbitmap_obj = (ndkbitmap_object_t *)malloc(sizeof(*ndkbitmap_obj));
-    int r = Open(ndkbitmap_obj);
+    int r = Open(ndkbitmap_obj, env);
     if (r != SUCCESS)
     {
         if (ndkbitmap_obj){
@@ -355,7 +411,7 @@ jboolean Java_tv_cjump_jni_NativeBitmapFactory_init(JNIEnv *env)
 #elif defined(__i386__)
     __android_log_print(ANDROID_LOG_INFO, "NativeBitmapFactory", "Loaded libndkbitmap.so arch is: x86");
 #endif
-    int r = Start();
+    int r = Start(env);
     return r == SUCCESS;
 }
 
@@ -381,6 +437,8 @@ jobject createBitmap(JNIEnv *env , jobject  obj, jint w, jint h, jint config, jb
             result = p_sys->gjni_createBitmap(env, bm, isMuttable, NULL, -1);
         } else if(p_sys->gjni_createBitmap_19later) {
             result = p_sys->gjni_createBitmap_19later(env, bm, NULL, isMuttable, NULL, NULL, -1);
+        } else if(p_sys->gjni_createBitmap_Mlater) {
+            result = p_sys->gjni_createBitmap_Mlater(env, bm, NULL, isMuttable, NULL, NULL, -1, w, h);
         }
 
     }
